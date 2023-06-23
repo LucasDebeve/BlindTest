@@ -1,0 +1,7 @@
+output/
+temp/
+src/
+.idea/
+__pycache__/
+
+*.mp4
