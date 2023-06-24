@@ -39,7 +39,7 @@ input[type="number"] {
 }
 
 
-input[type="submit"] {
+form > button {
   background-color: #555555;
   border: none;
   border-radius: 3px;
@@ -50,12 +50,104 @@ input[type="submit"] {
   width: 100%;
 }
 
-input[type="submit"]:hover {
+form > button:hover {
   background-color: #333333;
 }
 
-.error-message {
-  color: #ff0000;
-  font-size: 14px;
-  margin-top: 10px;
+label > span {
+    font-weight: 100;
+    color: #a1a1a1;
+}
+span.info
+{
+    display: block;
+}
+
+#alert {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 90%;
+  max-width: 600px;
+  background-color: #ffc7c7;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+}
+
+#alert h2 {
+  font-size: 20px;
+  margin-top: 0;
+}
+
+#alert p {
+  margin-bottom: 0;
+}
+
+#closeAlert {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  font-size: 18px;
+  color: #888;
+  cursor: pointer;
+}
+
+.hidden{
+    display: none;
+}
+
+.indeterminate-progress-bar {
+    /* Color */
+    background-color: #d1d5db;
+
+    /* Rounded border */
+    border-radius: 9999px;
+
+    /* Size */
+    height: 0.5rem;
+    width: 100%;
+
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.indeterminate-progress-bar__progress {
+    /* Color */
+    background-color: #3b82f6;
+
+    /* Rounded border */
+    border-radius: 9999px;
+
+    /* Absolute position */
+    position: absolute;
+    bottom: 0;
+    top: 0;
+    left: -50%;
+    width: 50%;
+}
+.actived {
+    /* Move the bar infinitely */
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-name: indeterminate-progress-bar;
+}
+
+.finished {
+    width: 100%;
+}
+
+@keyframes indeterminate-progress-bar {
+    from {
+        left: -50%;
+    }
+    to {
+        left: 100%;
+    }
 }

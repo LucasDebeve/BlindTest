@@ -5,21 +5,38 @@ from werkzeug.utils import secure_filename
 from main import BlindTest
 
 app = Flask(__name__)
+app.secret_key = 'secret_key'
 
 
 @app.route('/', methods=['GET', 'POST'])
 def create_blind_test():
     if request.method == 'POST':
+        if 'guess_duration' not in request.form or 'reveal_duration' not in request.form or 'number_of_videos' not in request.form or \
+                request.form['guess_duration'] == '' or request.form['reveal_duration'] == '' or request.form['number_of_videos'] == '' \
+                or int(request.form['guess_duration']) <= 0 or \
+                int(request.form['reveal_duration']) <= 0 or int(request.form['number_of_videos']) <= 0:
+            return render_template('index.html')
+
         folder = 'temp'  # Dossier temporaire pour stocker les fichiers envoyés
-        timer = request.form['timer']
         guess_duration = int(request.form['guess_duration'])
         reveal_duration = int(request.form['reveal_duration'])
         number_of_videos = int(request.form['number_of_videos'])
 
+        # Vérifier si des fichiers ont été envoyés, sinon lancer une alerte
+        if 'file' not in request.files or request.files['file'].filename == '':
+            return render_template('index.html', isAlert=True, error='No source file has been uploaded')
 
-
-        # Vérifier si des fichiers ont été envoyés
         files = request.files.getlist('file')
+
+        # Vérifier si un fichier timer a été envoyé sinon utiliser le timer par défaut
+        if 'timer' not in request.files or request.files['timer'].filename == '':
+            timer = 'src\\Timer.mp4'
+        else:
+            folder_timer = 'temp\\timer'
+            timer_file = request.files.get('timer')
+            timer_filename = secure_filename(timer_file.filename)
+            timer_file.save(os.path.join(folder_timer, timer_filename))
+            timer = os.path.join(folder_timer, timer_filename)
 
         # Enregistrer les fichiers dans le dossier temporaire
         for file in files:
@@ -35,9 +52,8 @@ def create_blind_test():
                 os.remove(file_path)
 
         return send_file(blind_test_path, as_attachment=True)
-
     else:
-        return render_template('index.html')
+        return render_template('index.html', isAlert=False, error='')
 
 
 def create_blindtest(timer, folder, guess_duration, reveal_duration, number_of_videos, return_queue):

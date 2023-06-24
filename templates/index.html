@@ -11,22 +11,34 @@
 <body>
     <h1>Créer un BlindTest</h1>
     <form action="/" method="post" enctype="multipart/form-data">
-        <label for="file">Files :</label>
-        <input type="file" id="file" name="file" accept="video/*" multiple required><br><br>
+        <label for="file">Files : <span>(required)</span></label>
+        <input type="file" id="file" name="file" accept="video/*" multiple><br><br>
 
-        <label for="timer">Timer :</label>
-        <input type="text" id="timer" name="timer" required><br><br>
+        <label for="timer">Timer : <span>(must end on "0 seconds")</span></label>
+        <input type="file" id="timer" name="timer" accept="video/*"><br><br>
 
-        <label for="guess_duration">Guess duration (s) :</label>
+        <label for="guess_duration">Guess duration (s) : <span>(not null, required)</span></label>
         <input type="number" id="guess_duration" name="guess_duration" value="5" required><br><br>
 
-        <label for="reveal_duration">Reveal duration (s) :</label>
+        <label for="reveal_duration">Reveal duration (s) : <span>(not null, required)</span></label>
         <input type="number" id="reveal_duration" name="reveal_duration" value="5" required><br><br>
 
-        <label for="number_of_videos">Number of videos :</label>
+        <label for="number_of_videos">Number of videos : <span>(not null, required)</span><span class="info">Enter a number smaller than the number of files selected to randomly choose videos from those selected.</span></label>
         <input type="number" id="number_of_videos" name="number_of_videos" value="3" required><br><br>
-
-        <input type="submit" value="Download BlindTest">
+        <div class="indeterminate-progress-bar">
+            <div class="indeterminate-progress-bar__progress"></div>
+        </div>
+        <button type="submit" onclick="active_bar()">Download BlindTest</button>
     </form>
+    {% if isAlert %}
+        <div id="alert">
+            <h2>Error</h2>
+            <p>{{ error }}</p>
+            <!-- Bouton fermer l'alerte -->
+            <button id="closeAlert" onclick="close_alert()">X</button>
+        </div>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

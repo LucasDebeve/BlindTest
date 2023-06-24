@@ -148,7 +148,7 @@ class BlindTest:
             i += 1
             path = os.path.join(self.output, f"blind_test[{i}].mp4")
         self.path = path
-        combined_clip.write_videofile(self.path, fps=24, codec='', audio_codec='aac')
+        combined_clip.write_videofile(self.path, fps=24, codec='mpeg4', audio_codec='aac')
 
         # Close all files
         combined_clip.close()
