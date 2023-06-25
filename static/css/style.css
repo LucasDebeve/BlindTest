@@ -1,17 +1,34 @@
+:root {
+    --primary-color: #f2f2f2;
+    --secondary-color: #333333;
+    --tertiary-color: #ffffff;
+    --fourth-color: #666666;
+    --fifth-color: #ccc;
+    --six-color: #555555;
+    --danger-color: #ffc7c7;
+}
+
+
+* {
+  margin: 0;
+  box-sizing: border-box;
+}
+
 body {
-  background-color: #f2f2f2;
+  background-color: var(--primary-color);
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
 }
 
 h1 {
-  color: #333333;
+  color: var(--secondary-color);
   text-align: center;
+  margin-top: 2rem;
 }
 
 form {
-    background-color: #ffffff;
+    background-color: var(--tertiary-color);
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     margin: 50px auto;
@@ -20,7 +37,7 @@ form {
 }
 
 label {
-  color: #666666;
+  color: var(--fourth-color);
   display: block;
   font-weight: bold;
   margin-bottom: 10px;
@@ -30,7 +47,7 @@ input[type="file"],
 input[type="text"],
 input[type="number"] {
   box-sizing: border-box;
-  border: 1px solid #cccccc;
+  border: 1px solid var(--fifth-color);
   border-radius: 3px;
   display: block;
   font-size: 16px;
@@ -40,23 +57,24 @@ input[type="number"] {
 
 
 form > button {
-  background-color: #555555;
+  background-color: var(--six-color);
   border: none;
   border-radius: 3px;
-  color: #ffffff;
+  color: var(--tertiary-color);
   cursor: pointer;
   font-size: 16px;
   padding: 10px;
   width: 100%;
+  transition: background-color 0.3s ease;
 }
 
 form > button:hover {
-  background-color: #333333;
+  background-color: var(--secondary-color);
 }
 
 label > span {
     font-weight: 100;
-    color: #a1a1a1;
+    color: var(--fourth-color);
 }
 span.info
 {
@@ -70,7 +88,7 @@ span.info
   transform: translate(-50%, 0);
   width: 90%;
   max-width: 600px;
-  background-color: #ffc7c7;
+  background-color: var(--danger-color);
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 20px;
@@ -85,6 +103,12 @@ span.info
 
 #alert p {
   margin-bottom: 0;
+}
+
+#alert a {
+  color: var(--secondary-color);
+  text-decoration: none;
+  float: right;
 }
 
 #closeAlert {

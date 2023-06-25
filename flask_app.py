@@ -1,18 +1,33 @@
 import os
 from multiprocessing import Process, Queue
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, redirect, url_for
 from werkzeug.utils import secure_filename
 from main import BlindTest
+import datetime
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
+def index():
+    """
+    Display the index page
+    :return:
+    """
+    return render_template('index.html', isAlert=False, error='')
+
+
+@app.route('/create', methods=['GET', 'POST'])
 def create_blind_test():
+    """
+    Create a blind test from the files sent by the user
+    :return:
+    """
     if request.method == 'POST':
         if 'guess_duration' not in request.form or 'reveal_duration' not in request.form or 'number_of_videos' not in request.form or \
-                request.form['guess_duration'] == '' or request.form['reveal_duration'] == '' or request.form['number_of_videos'] == '' \
+                request.form['guess_duration'] == '' or request.form['reveal_duration'] == '' or request.form[
+            'number_of_videos'] == '' \
                 or int(request.form['guess_duration']) <= 0 or \
                 int(request.form['reveal_duration']) <= 0 or int(request.form['number_of_videos']) <= 0:
             return render_template('index.html')
@@ -51,18 +66,59 @@ def create_blind_test():
             if os.path.isfile(file_path):
                 os.remove(file_path)
 
-        return send_file(blind_test_path, as_attachment=True)
+        blind_test_id = os.path.basename(blind_test_path)[11:-5]
+        return redirect(url_for('download', id=blind_test_id))
     else:
-        return render_template('index.html', isAlert=False, error='')
+        return redirect(url_for('index'))
 
 
-def create_blindtest(timer, folder, guess_duration, reveal_duration, number_of_videos, return_queue):
+@app.route('/download/<int:id>', methods=['GET', 'POST'])
+def download(id):
+    """
+    Interface to download the blind test
+    :param filename:
+    :return:
+    """
+    if request.method == 'GET':
+        path = 'output\\blind_test[' + str(id) + '].mp4'
+        filename = os.path.join(path)
+        if not os.path.exists(filename) or not os.path.isfile(filename) or os.path.getsize(filename) == 0 or not filename.endswith('.mp4'):
+            return render_template('error.html', error='The blind test does not exist or is not available')
+        created_date = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
+        closure_date = created_date + datetime.timedelta(days=1)
+        return render_template('download.html', title=os.path.basename(filename)[11:-5], created_date=created_date.strftime("%d-%m-%Y  %H:%M:%S"), closure_date=closure_date.strftime("%d-%m-%Y  %H:%M:%S"))
+    else:
+        return redirect(url_for('index'))
+
+
+def create_blindtest(timer: str, folder: str, guess_duration: int, reveal_duration: int,
+                     number_of_videos: int, return_queue: Queue) -> None:
+    """
+    Create a blind test and put the path to the blind test in the return queue. Call by the create_blindtest_wrapper
+    :param timer: path to the timer video
+    :param folder: path to the folder containing the videos
+    :param guess_duration: duration of the guess
+    :param reveal_duration: duration of the reveal
+    :param number_of_videos: number of videos
+    :param return_queue: queue to return the path to the blind test
+    :return: None
+    """
     blind_test = BlindTest(timer=timer, folder=folder, guess_duration=guess_duration,
                            reveal_duration=reveal_duration, number_of_videos=number_of_videos)
     return_queue.put(blind_test.path)
 
 
-def create_blindtest_wrapper(timer, folder, guess_duration, reveal_duration, number_of_videos):
+def create_blindtest_wrapper(timer: str, folder: str, guess_duration: int, reveal_duration: int,
+                             number_of_videos: int) -> str:
+    """
+    Create a blind test wrapper
+    :param timer: path to the timer video
+    :param folder: path to the folder containing the videos
+    :param guess_duration: duration of the guess
+    :param reveal_duration: duration of the reveal
+    :param number_of_videos: number of videos
+    :return: blind_test_path: path to the blind test
+    """
     return_queue = Queue()
     converter = Process(target=create_blindtest,
                         args=(timer, folder, guess_duration, reveal_duration, number_of_videos, return_queue))

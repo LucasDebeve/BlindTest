@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/download.css') }}">
+    <title>Blind Test prêt</title>
+</head>
+<body>
+  <main>
+      <h1>Blind Test prêt</h1>
+      <div class="info">
+        <h2>{{title }}</h2>
+        <p>Créer le {{created_date }}</p>
+        <p>Disponible jusque : {{closure_date  }}</p>
+        <a href="">Télécharger</a>
+      </div>
+      <div class="sub__info">
+        <p>Le Blind Test est prêt à être téléchargé.</p>
+        <p>Vous pouvez le télécharger en cliquant sur le bouton ci-dessous.</p>
+        <p>Vous pouvez aussi le télécharger plus tard en cliquant sur le bouton "Télécharger" dans le menu.</p>
+        <p>Le fichier sera supprimé automatiquement après 24h.</p>
+        <p>Si vous avez des questions, vous pouvez me contacter par mail à l'adresse suivante : <a href="mailto: lucas.debeve2003@gmail.com">lucas.debeve2003@gmail.com</a></p>
+      </div>
+  </main>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
