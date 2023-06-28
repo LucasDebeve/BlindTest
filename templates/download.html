@@ -9,6 +9,21 @@
     <title>Blind Test prêt</title>
 </head>
 <body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li class="dropdown">
+                    <button class="dropbtn">Downloads</button>
+                    <div class="dropdown-content">
+                        {% for file in files %}
+                            <a href="/download/{{ file[0] }}">{{ file[1] }}</a>
+                        {% endfor %}
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </header>
   <main>
       <h1>Blind Test prêt</h1>
       <div class="info">

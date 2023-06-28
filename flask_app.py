@@ -15,21 +15,7 @@ def index():
     Display the index page
     :return:
     """
-    # Get the list of files in the output folder
-    files = os.listdir('output')
-    # List of filenames
-    filenames = []
-    for file in files:
-        # If the file is a blind test
-        if file.startswith('blind_test'):
-            name = file[:-4]
-            id_file = file[11:-5]
-            date = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join('output', file))).strftime(
-                '%d/%m/%Y %H:%M:%S')
-            if (datetime.datetime.now() - datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join('output', file)))).days > 1:
-                os.remove(os.path.join('output', file))
-            else:
-                filenames.append((id_file, name, date))
+    filenames = getOutputFiles()
     return render_template('index.html', isAlert=False, error='', files=filenames)
 
 
@@ -102,10 +88,11 @@ def downloadPage(id):
             return render_template('error.html', error='The blind test does not exist or is not available')
         created_date = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
         closure_date = created_date + datetime.timedelta(days=1)
-
+        files = getOutputFiles()
         return render_template('download.html', file_id=id, title=os.path.basename(filename),
                                created_date=created_date.strftime("%d-%m-%Y  %H:%M:%S"),
-                               closure_date=closure_date.strftime("%d-%m-%Y  %H:%M:%S"))
+                               closure_date=closure_date.strftime("%d-%m-%Y  %H:%M:%S"),
+                               files=files)
     else:
         return redirect(url_for('index'))
 
@@ -164,6 +151,27 @@ def create_blindtest_wrapper(timer: str, folder: str, guess_duration: int, revea
     blind_test_path = return_queue.get()
 
     return blind_test_path
+
+
+def getOutputFiles():
+    """
+    Get the list of the output files
+    :return: list of the output files
+    """
+    files = os.listdir('output')
+    filenames = []
+    for file in files:
+        if file.startswith('blind_test'):
+            name = file[:-4]
+            id_file = file[11:-5]
+            date = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join('output', file))).strftime(
+                '%d/%m/%Y %H:%M:%S')
+            if (datetime.datetime.now() - datetime.datetime.fromtimestamp(
+                    os.path.getmtime(os.path.join('output', file)))).days > 1:
+                os.remove(os.path.join('output', file))
+            else:
+                filenames.append((id_file, name, date))
+    return filenames
 
 
 if __name__ == '__main__':
