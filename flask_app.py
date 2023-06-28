@@ -64,8 +64,6 @@ def create_blind_test():
             timer_file.save(os.path.join(folder_timer, timer_filename))
             timer = os.path.join(folder_timer, timer_filename)
 
-
-
         blind_test_path = create_blindtest_wrapper(timer, folder, guess_duration, reveal_duration, number_of_videos)
 
         # Supprimer les fichiers du dossier temporaire après utilisation
