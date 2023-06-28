@@ -14,17 +14,17 @@
             <ul>
                 <li><a href="/">Home</a></li>
                 <li class="dropdown">
-                    <button class="dropbtn">Download</button>
+                    <button class="dropbtn">Downloads</button>
                     <div class="dropdown-content">
                         {% for file in files %}
-                            <a href="/download/{{ file[0] }}/download">{{ file[1] }}</a>
+                            <a href="/download/{{ file[0] }}">{{ file[1] }}</a>
                         {% endfor %}
                     </div>
                 </li>
             </ul>
         </nav>
     </header>
-    <h1>Créer un BlindTest</h1>
+    <h1>Create a Blind Test</h1>
     <form action="/create" method="post" enctype="multipart/form-data">
         <label for="file">Files : <span>(required)</span></label>
         <input type="file" id="file" name="file" accept="video/*" multiple><br><br>
