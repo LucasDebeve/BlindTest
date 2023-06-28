@@ -25,26 +25,34 @@
         </nav>
     </header>
     <h1>Create a Blind Test</h1>
-    <form action="/create" method="post" enctype="multipart/form-data">
-        <label for="file">Files : <span>(required)</span></label>
-        <input type="file" id="file" name="file" accept="video/*" multiple><br><br>
-
-        <label for="timer">Timer : <span>(must end on "0 seconds")</span></label>
-        <input type="file" id="timer" name="timer" accept="video/*"><br><br>
-
-        <label for="guess_duration">Guess duration (s) : <span>(not null, required)</span></label>
-        <input type="number" id="guess_duration" name="guess_duration" value="5" required><br><br>
-
-        <label for="reveal_duration">Reveal duration (s) : <span>(not null, required)</span></label>
-        <input type="number" id="reveal_duration" name="reveal_duration" value="5" required><br><br>
-
-        <label for="number_of_videos">Number of videos : <span>(not null, required)</span><span class="info">Enter a number smaller than the number of files selected to randomly choose videos from those selected.</span></label>
-        <input type="number" id="number_of_videos" name="number_of_videos" value="3" required><br><br>
-        <div class="indeterminate-progress-bar">
-            <div class="indeterminate-progress-bar__progress"></div>
+    <main>
+        <form action="/create" method="post" enctype="multipart/form-data">
+        <div class="form__part">
+            <label for="links">Links to Youtube videos : <span class="info">Ex :<br>https://www.youtube.com/watch?v=dQw4w9WgXcQ<br>https://www.youtube.com/watch?v=6_9uMfInpTg</span></label>
+            <textarea name="links" id="links"></textarea>
         </div>
-        <button type="submit" onclick="active_bar()">Download BlindTest</button>
+        <div class="form__part">
+            <label for="file">Files : <span>(required)</span></label>
+            <input type="file" id="file" name="file" accept="video/*" multiple><br><br>
+
+            <label for="timer">Timer : <span>(must end on "0 seconds")</span></label>
+            <input type="file" id="timer" name="timer" accept="video/*"><br><br>
+
+            <label for="guess_duration">Guess duration (s) : <span>(not null, required)</span></label>
+            <input type="number" id="guess_duration" name="guess_duration" value="5" required><br><br>
+
+            <label for="reveal_duration">Reveal duration (s) : <span>(not null, required)</span></label>
+            <input type="number" id="reveal_duration" name="reveal_duration" value="5" required><br><br>
+
+            <label for="number_of_videos">Number of videos : <span>(not null, required)</span><span class="info">Enter a number smaller than the number of files selected to randomly choose videos from those selected.</span></label>
+            <input type="number" id="number_of_videos" name="number_of_videos" value="3" required><br><br>
+            <div class="indeterminate-progress-bar">
+                <div class="indeterminate-progress-bar__progress"></div>
+            </div>
+            <button type="submit" onclick="active_bar()">Download BlindTest</button>
+        </div>
     </form>
+    </main>
     {% if isAlert %}
         <div id="alert">
             <h2>Error</h2>
