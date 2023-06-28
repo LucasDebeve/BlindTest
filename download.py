@@ -1,14 +1,15 @@
 import yt_dlp
 
 
-def download_video(link: str):
+def download_video(link: str, title: str) -> str:
     """
     Download a video from a link
-    :param link:
-    :return: str
+    :param title: title of the video
+    :param link: link of the video
+    :return: str (error message)
     """
     ydl_opts = {'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-                'outtmpl': 'downloaded/%(title)s.%(ext)s',
+                'outtmpl': 'temp/' + title + '.%(ext)s',
                 'merge_output_format': 'mp4',
                 'restrictfilenames': True,
                 'overwrites': True,

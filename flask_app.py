@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, send_file, redirect, url_for
 from werkzeug.utils import secure_filename
 from main import BlindTest
 import datetime
+from download import download_video, get_title
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
@@ -26,12 +27,12 @@ def create_blind_test():
     :return:
     """
     if request.method == 'POST':
-        if 'guess_duration' not in request.form or 'reveal_duration' not in request.form or 'number_of_videos' not in request.form or \
-                request.form['guess_duration'] == '' or request.form['reveal_duration'] == '' or request.form[
-            'number_of_videos'] == '' \
+        if 'links' not in request.form or 'guess_duration' not in request.form or 'reveal_duration' not in request.form or 'number_of_videos' not in request.form or \
+                request.form['guess_duration'] == '' or request.form['reveal_duration'] == '' \
+                or request.form['number_of_videos'] == '' \
                 or int(request.form['guess_duration']) <= 0 or \
                 int(request.form['reveal_duration']) <= 0 or int(request.form['number_of_videos']) <= 0:
-            return render_template('index.html')
+            return render_template('index.html', isAlert=True, error='Bad request', files=getOutputFiles())
 
         folder = 'temp'  # Dossier temporaire pour stocker les fichiers envoyés
         guess_duration = int(request.form['guess_duration'])
@@ -40,9 +41,18 @@ def create_blind_test():
 
         # Vérifier si des fichiers ont été envoyés, sinon lancer une alerte
         if 'file' not in request.files or request.files['file'].filename == '':
-            return render_template('index.html', isAlert=True, error='No source file has been uploaded')
+            if request.form['links'] == '':
+                return render_template('index.html', isAlert=True, error='No source file has been uploaded',
+                                       files=getOutputFiles())
+            else:
+                download_from_yt(request.form['links'], number_of_videos)
 
-        files = request.files.getlist('file')
+        else:
+            files = request.files.getlist('file')
+            # Enregistrer les fichiers dans le dossier temporaire
+            for file in files:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(folder, filename))
 
         # Vérifier si un fichier timer a été envoyé sinon utiliser le timer par défaut
         if 'timer' not in request.files or request.files['timer'].filename == '':
@@ -54,10 +64,7 @@ def create_blind_test():
             timer_file.save(os.path.join(folder_timer, timer_filename))
             timer = os.path.join(folder_timer, timer_filename)
 
-        # Enregistrer les fichiers dans le dossier temporaire
-        for file in files:
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(folder, filename))
+
 
         blind_test_path = create_blindtest_wrapper(timer, folder, guess_duration, reveal_duration, number_of_videos)
 
@@ -88,11 +95,10 @@ def downloadPage(id):
             return render_template('error.html', error='The blind test does not exist or is not available')
         created_date = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
         closure_date = created_date + datetime.timedelta(days=1)
-        files = getOutputFiles()
         return render_template('download.html', file_id=id, title=os.path.basename(filename),
                                created_date=created_date.strftime("%d-%m-%Y  %H:%M:%S"),
                                closure_date=closure_date.strftime("%d-%m-%Y  %H:%M:%S"),
-                               files=files)
+                               files=getOutputFiles())
     else:
         return redirect(url_for('index'))
 
@@ -172,6 +178,20 @@ def getOutputFiles():
             else:
                 filenames.append((id_file, name, date))
     return filenames
+
+
+def download_from_yt(text: str, number_of_videos) -> str:
+    res = ""
+    list_of_videos = text.split('\r\n')
+    if len(list_of_videos) < 1:
+        return "No video found"
+    if len(list_of_videos) > number_of_videos:
+        list_of_videos = list_of_videos[:number_of_videos]
+    for video in list_of_videos:
+        if video.startswith('https://www.youtube.com/watch?v='):
+            link, title = video.split(' : ')[0:2]
+            res += download_video(link, title) + "<br>"
+    return res
 
 
 if __name__ == '__main__':
