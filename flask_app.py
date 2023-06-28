@@ -15,7 +15,22 @@ def index():
     Display the index page
     :return:
     """
-    return render_template('index.html', isAlert=False, error='')
+    # Get the list of files in the output folder
+    files = os.listdir('output')
+    # List of filenames
+    filenames = []
+    for file in files:
+        # If the file is a blind test
+        if file.startswith('blind_test'):
+            name = file[:-4]
+            id_file = file[11:-5]
+            date = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join('output', file))).strftime(
+                '%d/%m/%Y %H:%M:%S')
+            if (datetime.datetime.now() - datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join('output', file)))).days > 1:
+                os.remove(os.path.join('output', file))
+            else:
+                filenames.append((id_file, name, date))
+    return render_template('index.html', isAlert=False, error='', files=filenames)
 
 
 @app.route('/create', methods=['GET', 'POST'])
@@ -82,15 +97,15 @@ def downloadPage(id):
     if request.method == 'GET':
         path = 'output\\blind_test[' + str(id) + '].mp4'
         filename = os.path.join(path)
-        if not os.path.exists(filename) or not os.path.isfile(filename) or os.path.getsize(filename) == 0 or not filename.endswith('.mp4'):
+        if not os.path.exists(filename) or not os.path.isfile(filename) or os.path.getsize(
+                filename) == 0 or not filename.endswith('.mp4'):
             return render_template('error.html', error='The blind test does not exist or is not available')
         created_date = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
         closure_date = created_date + datetime.timedelta(days=1)
 
-        # if datetime.datetime.now() > closure_date:
-        #    return render_template('error.html', error='The blind test is no longer available')
-
-        return render_template('download.html', file_id=id, title=os.path.basename(filename), created_date=created_date.strftime("%d-%m-%Y  %H:%M:%S"), closure_date=closure_date.strftime("%d-%m-%Y  %H:%M:%S"))
+        return render_template('download.html', file_id=id, title=os.path.basename(filename),
+                               created_date=created_date.strftime("%d-%m-%Y  %H:%M:%S"),
+                               closure_date=closure_date.strftime("%d-%m-%Y  %H:%M:%S"))
     else:
         return redirect(url_for('index'))
 
@@ -105,7 +120,8 @@ def download(id):
     if request.method == 'GET':
         path = 'output\\blind_test[' + str(id) + '].mp4'
         filename = os.path.join(path)
-        if not os.path.exists(filename) or not os.path.isfile(filename) or os.path.getsize(filename) == 0 or not filename.endswith('.mp4'):
+        if not os.path.exists(filename) or not os.path.isfile(filename) or os.path.getsize(
+                filename) == 0 or not filename.endswith('.mp4'):
             return render_template('error.html', error='The blind test does not exist or is not available')
         return send_file(filename, as_attachment=True)
     else:
