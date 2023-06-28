@@ -67,16 +67,16 @@ def create_blind_test():
                 os.remove(file_path)
 
         blind_test_id = os.path.basename(blind_test_path)[11:-5]
-        return redirect(url_for('download', id=blind_test_id))
+        return redirect(url_for('downloadPage', id=blind_test_id))
     else:
         return redirect(url_for('index'))
 
 
 @app.route('/download/<int:id>', methods=['GET', 'POST'])
-def download(id):
+def downloadPage(id):
     """
     Interface to download the blind test
-    :param filename:
+    :param id:
     :return:
     """
     if request.method == 'GET':
@@ -86,7 +86,28 @@ def download(id):
             return render_template('error.html', error='The blind test does not exist or is not available')
         created_date = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
         closure_date = created_date + datetime.timedelta(days=1)
-        return render_template('download.html', title=os.path.basename(filename)[11:-5], created_date=created_date.strftime("%d-%m-%Y  %H:%M:%S"), closure_date=closure_date.strftime("%d-%m-%Y  %H:%M:%S"))
+
+        # if datetime.datetime.now() > closure_date:
+        #    return render_template('error.html', error='The blind test is no longer available')
+
+        return render_template('download.html', file_id=id, title=os.path.basename(filename), created_date=created_date.strftime("%d-%m-%Y  %H:%M:%S"), closure_date=closure_date.strftime("%d-%m-%Y  %H:%M:%S"))
+    else:
+        return redirect(url_for('index'))
+
+
+@app.route('/download/<int:id>/download', methods=['GET', 'POST'])
+def download(id):
+    """
+    Download the blind test
+    :param id:
+    :return:
+    """
+    if request.method == 'GET':
+        path = 'output\\blind_test[' + str(id) + '].mp4'
+        filename = os.path.join(path)
+        if not os.path.exists(filename) or not os.path.isfile(filename) or os.path.getsize(filename) == 0 or not filename.endswith('.mp4'):
+            return render_template('error.html', error='The blind test does not exist or is not available')
+        return send_file(filename, as_attachment=True)
     else:
         return redirect(url_for('index'))
 
