@@ -1,8 +1,9 @@
-output/
-temp/
-src/
+api/output/
+api/temp/
+api/src/
 .idea/
 __pycache__/
 
 *.mp4
 *.pyc
+.vercel
