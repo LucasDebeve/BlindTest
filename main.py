@@ -13,7 +13,7 @@ class BlindTest:
     path = ""
     width, height = 1280, 720
 
-    def __init__(self, timer: str, folder: str, output: str = 'output', guess_duration: int = 5,
+    def __init__(self, timer: str, folder: str, output: str = '/root/blind-test/output', guess_duration: int = 5,
                  reveal_duration: int = 5,
                  number_of_videos: int = 3):
         """
@@ -62,6 +62,7 @@ class BlindTest:
         :param number_of_videos:
         :return:
         """
+        print("Debut de l'exportation")
         clips = []
         audios = []
         deja_vu = []
@@ -93,14 +94,15 @@ class BlindTest:
                 clip = clip.audio_fadeout(1).audio_fadein(1).fx(afx.audio_normalize)
                 audios.append(clip.audio)
 
-                clip = clip.subclip(self.duration[0], self.duration[0] + self.duration[1]).fx(vfx.mirror_x)
+                clip = clip.subclip(self.duration[0], self.duration[0] + self.duration[1])
                 clip.audio = None
 
                 # Generate a text clip
-                txt_clip = TextClip(video[:-4], fontsize=(75 if len(video) - 4 < 30 else 50), color='black',
-                                    font='Arial-Black', stroke_color='white',
-                                    stroke_width=2).set_position('center').set_duration(self.duration[1])
-                clip = CompositeVideoClip([clip, txt_clip])
+                # print(video[:-4])
+                # txt_clip = TextClip(video[:-4], fontsize=(75 if len(video) - 4 < 30 else 50), color='black',
+                #                   font='Courier-Bold', stroke_color='white',
+                #                   stroke_width=2).set_position('center').set_duration(self.duration[1])
+                # clip = CompositeVideoClip([clip, txt_clip])
 
                 clips.append(clip)
         else:
@@ -155,6 +157,3 @@ class BlindTest:
         for clip in clips:
             clip.close()
 
-
-if __name__ == '__main__':
-    bt = BlindTest('src\\Timer.mp4', 'X:\\Blind test\\Openings', number_of_videos=2)

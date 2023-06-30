@@ -4,10 +4,15 @@ from flask import Flask, render_template, request, send_file, redirect, url_for
 from werkzeug.utils import secure_filename
 from main import BlindTest
 import datetime
-from download import download_video, get_title
+from download import download_video, get_title, download_audio
+from pathlib import Path
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
+
+app.config['SERVER_NAME'] = "lucasdebeve.fr"
+
+path = str(Path(__file__).parent)
 
 
 @app.route('/')
@@ -34,7 +39,7 @@ def create_blind_test():
                 int(request.form['reveal_duration']) <= 0 or int(request.form['number_of_videos']) <= 0:
             return render_template('index.html', isAlert=True, error='Bad request', files=getOutputFiles())
 
-        folder = 'temp'  # Dossier temporaire pour stocker les fichiers envoyés
+        folder = f'{path}/temp'
         guess_duration = int(request.form['guess_duration'])
         reveal_duration = int(request.form['reveal_duration'])
         number_of_videos = int(request.form['number_of_videos'])
@@ -46,7 +51,6 @@ def create_blind_test():
                                        files=getOutputFiles())
             else:
                 download_from_yt(request.form['links'], number_of_videos)
-
         else:
             files = request.files.getlist('file')
             # Enregistrer les fichiers dans le dossier temporaire
@@ -56,9 +60,9 @@ def create_blind_test():
 
         # Vérifier si un fichier timer a été envoyé sinon utiliser le timer par défaut
         if 'timer' not in request.files or request.files['timer'].filename == '':
-            timer = 'src\\Timer.mp4'
+            timer = f'{path}/src/Timer.mp4'
         else:
-            folder_timer = 'temp\\timer'
+            folder_timer = f'{path}/temp/timer'
             timer_file = request.files.get('timer')
             timer_filename = secure_filename(timer_file.filename)
             timer_file.save(os.path.join(folder_timer, timer_filename))
@@ -86,8 +90,8 @@ def downloadPage(id):
     :return:
     """
     if request.method == 'GET':
-        path = 'output\\blind_test[' + str(id) + '].mp4'
-        filename = os.path.join(path)
+        file_path = f'{path}/output/blind_test[' + str(id) + '].mp4'
+        filename = os.path.join(file_path)
         if not os.path.exists(filename) or not os.path.isfile(filename) or os.path.getsize(
                 filename) == 0 or not filename.endswith('.mp4'):
             return render_template('error.html', error='The blind test does not exist or is not available')
@@ -109,14 +113,49 @@ def download(id):
     :return:
     """
     if request.method == 'GET':
-        path = 'output\\blind_test[' + str(id) + '].mp4'
-        filename = os.path.join(path)
+        file_path = f'{path}/output/blind_test[' + str(id) + '].mp4'
+        filename = os.path.join(file_path)
         if not os.path.exists(filename) or not os.path.isfile(filename) or os.path.getsize(
                 filename) == 0 or not filename.endswith('.mp4'):
             return render_template('error.html', error='The blind test does not exist or is not available')
         return send_file(filename, as_attachment=True)
     else:
         return redirect(url_for('index'))
+
+
+@app.route('/', subdomain="crampte")
+def index_yt_downloader():
+    return render_template('youtube-download.html', error='')
+
+
+@app.route('/download', methods=['POST'], subdomain="crampte")
+def download_yt_downloader():
+    if 'link' not in request.form or 'format' not in request.form:
+        return render_template('youtube-download.html', error='Bad request')
+    link = request.form['link']
+    format = request.form['format']
+
+    title = secure_filename(get_title(link))
+    if os.path.exists(os.path.join(f"{path}/downloaded/{format}", f"{title}.{format}")):
+        i = 1
+        file_path = os.path.join(f"{path}/downloaded/{format}", f"{title}[{i}].{format}")
+        while os.path.exists(file_path):
+            i += 1
+            file_path = os.path.join(f"{path}/downloaded/{format}", f"{title}[{i}].{format}")
+
+    if format in ['mp3']:
+        res = download_audio(link, title, format, output=f'downloaded/{format}')
+    else:
+        res = download_video(link, title, format, output=f'downloaded/{format}')
+
+    if "downloaded : " in res:
+        return send_file(f"{path}/downloaded/{format}/{title}.{format}", as_attachment=True)
+    return render_template('youtube-download.html', error=res)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return "404 : Pas de bol"
 
 
 def create_blindtest(timer: str, folder: str, guess_duration: int, reveal_duration: int,
@@ -162,17 +201,17 @@ def getOutputFiles():
     Get the list of the output files
     :return: list of the output files
     """
-    files = os.listdir('output')
+    files = os.listdir(f'{path}/output')
     filenames = []
     for file in files:
         if file.startswith('blind_test'):
             name = file[:-4]
             id_file = file[11:-5]
-            date = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join('output', file))).strftime(
+            date = datetime.datetime.fromtimestamp(os.path.getmtime(os.path.join(f'{path}/output', file))).strftime(
                 '%d/%m/%Y %H:%M:%S')
             if (datetime.datetime.now() - datetime.datetime.fromtimestamp(
-                    os.path.getmtime(os.path.join('output', file)))).days > 1:
-                os.remove(os.path.join('output', file))
+                    os.path.getmtime(os.path.join(f'{path}/output', file)))).days > 1:
+                os.remove(os.path.join(f'{path}/output', file))
             else:
                 filenames.append((id_file, name, date))
     return filenames
@@ -190,7 +229,3 @@ def download_from_yt(text: str, number_of_videos) -> str:
             link, title = video.split(' : ')[0:2]
             res += download_video(link, title) + "<br>"
     return res
-
-
-if __name__ == '__main__':
-    app.run(debug=True)

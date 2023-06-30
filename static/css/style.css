@@ -162,6 +162,7 @@ label {
 input[type="file"],
 input[type="text"],
 input[type="number"],
+select,
 textarea{
   box-sizing: border-box;
   border: 1px solid var(--fifth-color);
