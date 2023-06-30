@@ -6,6 +6,7 @@ from main import BlindTest
 import datetime
 from download import download_video, get_title, download_audio
 from pathlib import Path
+from contextlib import contextmanager
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'
@@ -39,7 +40,7 @@ def create_blind_test():
                 int(request.form['reveal_duration']) <= 0 or int(request.form['number_of_videos']) <= 0:
             return render_template('index.html', isAlert=True, error='Bad request', files=getOutputFiles())
 
-        folder = f'{path}/temp'
+        folder = f'{path}/temp/'
         guess_duration = int(request.form['guess_duration'])
         reveal_duration = int(request.form['reveal_duration'])
         number_of_videos = int(request.form['number_of_videos'])
@@ -128,6 +129,17 @@ def index_yt_downloader():
     return render_template('youtube-download.html', error='')
 
 
+@contextmanager
+def delete_file(filename):
+    try:
+        yield
+    finally:
+        try:
+            os.remove(filename)
+        except Exception as e:
+            print(f"Erreur lors de la suppression du fichier : {e}")
+
+
 @app.route('/download', methods=['POST'], subdomain="crampte")
 def download_yt_downloader():
     if 'link' not in request.form or 'format' not in request.form:
@@ -146,10 +158,11 @@ def download_yt_downloader():
     if format in ['mp3']:
         res = download_audio(link, title, format, output=f'downloaded/{format}')
     else:
-        res = download_video(link, title, format, output=f'downloaded/{format}')
+        res = download_video(link, title, output=f'downloaded/{format}')
 
     if "downloaded : " in res:
-        return send_file(f"{path}/downloaded/{format}/{title}.{format}", as_attachment=True)
+        with delete_file(f"{path}/downloaded/{format}/{title}.{format}"):
+            return send_file(f"{path}/downloaded/{format}/{title}.{format}", as_attachment=True)
     return render_template('youtube-download.html', error=res)
 
 

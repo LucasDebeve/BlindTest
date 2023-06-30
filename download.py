@@ -1,10 +1,10 @@
 import yt_dlp
 from pathlib import Path
 
+
 path = str(Path(__file__).parent)
 
-
-def download_video(link: str, title: str, format: str = 'mp4', output: str = 'temp') -> str:
+def download_video(link: str, title: str, output: str = 'temp') -> str:
     """
     Download a video from a link
     :param title: title of the video
@@ -12,15 +12,15 @@ def download_video(link: str, title: str, format: str = 'mp4', output: str = 'te
     :param format: format of export
     :return: str (error message)
     """
-    ydl_opts = {'format': f'bestvideo+bestaudio[ext=m4a]/best[ext=mp4]/best',
+    ydl_opts = {'format': f'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                 'outtmpl': f'{path}/{output}/' + title + '.%(ext)s',
-                'merge_output_format': format,
+                'merge_output_format': 'mp4',
                 'restrictfilenames': True,
                 'overwrites': True,
                 'postprocessors': [
                     {
                         'key': 'FFmpegVideoConvertor',
-                        'preferedformat': format
+                        'preferedformat': 'mp4'
                     },
                     {
                         'key': 'FFmpegMetadata',
@@ -29,7 +29,7 @@ def download_video(link: str, title: str, format: str = 'mp4', output: str = 'te
                 ]}
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            title = get_title(ydl, link)
+            title = get_title(link, ydl)
             ydl.download([link])
     except Exception as e:
         if isinstance(e, yt_dlp.utils.DownloadError):
@@ -81,8 +81,7 @@ def download_audio(link: str, title: str, format: str = 'mp3', output: str = 'te
 
     return "Audio downloaded : " + title
 
-
-def get_title(link: str, ydl=yt_dlp.YoutubeDL()) -> str:
+def get_title(link: str, ydl = yt_dlp.YoutubeDL()) -> str:
     """
     Get the title of a video from a link
     :param ydl:
